@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+// src/pages/LessonView.jsx
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getLesson } from "../api/lessons";
+import LessonBlockRenderer from "../components/LessonBlockRenderer";
 
-export default function LessonView() {
+const LessonView = () => {
   const { id } = useParams();
   const [lesson, setLesson] = useState(null);
 
@@ -10,7 +12,7 @@ export default function LessonView() {
     const fetchLesson = async () => {
       try {
         const res = await getLesson(id);
-        if (res.data.success) setLesson(res.data.lesson);
+        setLesson(res.data.lesson);
       } catch (err) {
         console.error(err);
       }
@@ -18,21 +20,34 @@ export default function LessonView() {
     fetchLesson();
   }, [id]);
 
-  if (!lesson) return <div>Loading...</div>;
+  if (!lesson) return <p>Loading lesson...</p>;
 
   return (
-    <div>
-      <h2>{lesson.title}</h2>
+    <div style={{ maxWidth: "800px", margin: "0 auto", padding: "2em" }}>
+      <h1>{lesson.title}</h1>
       <p>{lesson.description}</p>
-      <div>
-        {lesson.tags.map((tag) => (
-          <span key={tag} style={{ background: "#eee", padding: "2px 6px", marginRight: "5px", borderRadius: "4px" }}>
+      <div style={{ marginBottom: "1em" }}>
+        {lesson.tags?.map((tag) => (
+          <span
+            key={tag}
+            style={{
+              display: "inline-block",
+              backgroundColor: "#eee",
+              padding: "0.2em 0.5em",
+              marginRight: "0.5em",
+              borderRadius: "3px",
+              fontSize: "0.9em",
+            }}
+          >
             {tag}
           </span>
         ))}
       </div>
-      <h3>Content:</h3>
-      <pre>{JSON.stringify(lesson.content, null, 2)}</pre>
+      {lesson.content?.blocks?.map((block, index) => (
+        <LessonBlockRenderer key={index} block={block} />
+      ))}
     </div>
   );
-}
+};
+
+export default LessonView;
