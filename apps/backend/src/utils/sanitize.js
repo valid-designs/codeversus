@@ -1,6 +1,6 @@
-import sanitizeHtml from 'sanitize-html.js';
+import sanitizeHtml from "sanitize-html";
 
-module.exports = (text) =>
+export default (text) =>
   sanitizeHtml(text, {
     allowedTags: [],
     allowedAttributes: {},

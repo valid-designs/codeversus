@@ -1,6 +1,6 @@
-import searchService from '../services/searchService.js';
+import searchService from "../services/searchService.js";
 
-exports.searchLessons = async (req, res, next) => {
+export const searchLessons = async (req, res, next) => {
   try {
     const lessons = await searchService.searchLessons(req.query);
     res.json({ success: true, data: lessons });

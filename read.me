@@ -203,16 +203,16 @@ const pool = new Pool({
   port: process.env.DB_PORT
 });
 
-module.exports = pool;
+export default pool;
 
 src/index.js
-const express = require("express");
-const cors = require("cors");
+import express from 'express.js';
+import cors from 'cors.js';
 require("dotenv").config();
 
-const authRoutes = require("./routes/auth");
-const lessonRoutes = require("./routes/lessons");
-const searchRoutes = require("./routes/search");
+import authRoutes from './routes/auth.js';
+import lessonRoutes from './routes/lessons.js';
+import searchRoutes from './routes/search.js';
 
 const app = express();
 app.use(cors());
@@ -226,30 +226,30 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
 
 src/routes/auth.js
-const express = require("express");
+import express from 'express.js';
 const router = express.Router();
-const authController = require("../controllers/authController");
+import authController from '../controllers/authController.js';
 
 router.post("/register", authController.register);
 router.post("/login", authController.login);
 
-module.exports = router;
+export default router;
 
 src/routes/lessons.js
-const express = require("express");
+import express from 'express.js';
 const router = express.Router();
-const lessonController = require("../controllers/lessonController");
-const authMiddleware = require("../middleware/authMiddleware");
+import lessonController from '../controllers/lessonController.js';
+import authMiddleware from '../middleware/authMiddleware.js';
 
 router.post("/", authMiddleware, lessonController.createLesson);
 router.get("/:id", lessonController.getLesson);
 router.put("/:id", authMiddleware, lessonController.updateLesson);
 router.get("/:id/ratings", lessonController.getRatings);
 
-module.exports = router;
+export default router;
 
 src/middleware/authMiddleware.js
-const jwt = require("jsonwebtoken");
+import jwt from 'jsonwebtoken.js';
 
 module.exports = function(req, res, next) {
   const authHeader = req.headers["authorization"];
@@ -268,9 +268,9 @@ module.exports = function(req, res, next) {
 };
 
 src/controllers/authController.js
-const pool = require("../db");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+import pool from '../db.js';
+import bcrypt from 'bcryptjs.js';
+import jwt from 'jsonwebtoken.js';
 
 exports.register = async (req, res) => {
   const { username, email, password } = req.body;
@@ -304,7 +304,7 @@ exports.login = async (req, res) => {
 };
 
 src/controllers/lessonController.js (simplified)
-const pool = require("../db");
+import pool from '../db.js';
 
 exports.createLesson = async (req, res) => {
   const { title, description, tags, status, content } = req.body;

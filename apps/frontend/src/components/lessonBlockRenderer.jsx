@@ -25,7 +25,7 @@ const LessonBlockRenderer = ({ block }) => {
         <img
           src={block.content}
           alt={block.alt || "Lesson image"}
-          style={{ maxWidth: "100%", marginBottom: "1em" }}
+         style={{ maxWidth: "100%", marginBottom: "1em" }}
         />
       );
 
@@ -35,3 +35,4 @@ const LessonBlockRenderer = ({ block }) => {
 };
 
 export default LessonBlockRenderer;
+ 

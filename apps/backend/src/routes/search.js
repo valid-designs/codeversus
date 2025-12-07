@@ -1,7 +1,8 @@
-import express from 'express.js';
-const router = express.Router();
-import ctrl from '../controllers/searchController.js';
+import express from "express";
+import { searchLessons } from "../controllers/searchController.js";
 
-router.get("/", ctrl.searchLessons);
+const router = express.Router();
+
+router.get("/", searchLessons);
 
 export default router;

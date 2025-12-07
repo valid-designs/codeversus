@@ -1,13 +1,13 @@
-import jwt from 'jsonwebtoken.js';
+import jwt from "jsonwebtoken";
 
-module.exports = function generateToken(user) {
+export default function generateToken(user) {
   return jwt.sign(
     {
       id: user.id,
       email: user.email,
-      username: user.username
+      username: user.username,
     },
     process.env.JWT_SECRET,
     { expiresIn: "7d" }
   );
-};
+}

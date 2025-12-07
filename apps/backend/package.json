@@ -1,12 +1,12 @@
 {
   "name": "backend",
-  "version": "v24.11.1",
+  "version": "1.0.0",
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",        
-    "dev": "nodemon src/index.js",       
-    "lint": "eslint .",                  
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "lint": "eslint .",
     "test": "echo \"No tests specified\" && exit 0"
   },
   "dependencies": {
@@ -15,7 +15,9 @@
     "dotenv": "^16.4.0",
     "express": "^4.19.0",
     "jsonwebtoken": "^9.0.2",
-    "pg": "^8.11.0"
+    "pg": "^8.11.0",
+    "sanitize-html": "^2.10.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.11",

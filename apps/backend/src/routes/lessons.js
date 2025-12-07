@@ -1,13 +1,14 @@
-import express from 'express.js';
-const router = express.Router();
-import ctrl from '../controllers/lessonController.js';
-import auth from '../middlewares/authMiddleware.js';
-import validate from '../middlewares/validate.js';
-const { lessonCreateSchema, lessonUpdateSchema } = require("../validation/schemas");
+import express from "express";
+import { createLesson, getLesson, updateLesson, deleteLesson } from "../controllers/lessonController.js";
+import auth from "../middlewares/authMiddleware.js";
+import validate from "../middlewares/validate.js";
+import { lessonCreateSchema, lessonUpdateSchema } from "../validation/schemas.js";
 
-router.post("/", auth, validate(lessonCreateSchema), ctrl.createLesson);
-router.put("/:lessonId", auth, validate(lessonUpdateSchema), ctrl.updateLesson);
-router.delete("/:lessonId", auth, ctrl.deleteLesson);
-router.get("/:lessonId", ctrl.getLesson);
+const router = express.Router();
+
+router.post("/", auth, validate(lessonCreateSchema), createLesson);
+router.get("/:lessonId", getLesson);
+router.put("/:lessonId", auth, validate(lessonUpdateSchema), updateLesson);
+router.delete("/:lessonId", auth, deleteLesson);
 
 export default router;

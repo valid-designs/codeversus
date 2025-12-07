@@ -1,573 +1,117 @@
-/api/auth.js
-export const registerUser = (data) => axiosInstance.post("/auth/register", data);
-export const loginUser = (data) => axiosInstance.post("/auth/login", data);
-/api/axiosInstance.js
-import axios from "axios";
+/controllers/authController.js
+import authService from '../services/authService.js';
+import generateToken from '../utils/generateToken.js';
 
-const instance = axios.create({
-  baseURL: "http://localhost:5000", // your backend URL
-});
+exports.register = async (req, res, next) => {
+  try {
+    const { username, email, password } = req.body;
+    const user = await authService.register(username, email, password);
 
-// attach JWT automatically
-instance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  if (token) {
-    config.headers["Authorization"] = `Bearer ${token}`;
+    res.json({ success: true, data: user });
+  } catch (err) {
+    next(err);
   }
-  return config;
-});
+};
 
-export default instance;
+exports.login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await authService.login(email, password);
 
-/api/lessons.js
-import axios from "./axiosInstance";
+    const token = generateToken(user);
 
-export const getLessons = () => axios.get("/lessons");
-export const getLesson = (id) => axios.get(`/lessons/${id}`);
-export const createLesson = (data) => axios.post("/lessons", data);
-export const updateLesson = (id, data) => axios.put(`/lessons/${id}`, data);
-export const deleteLesson = (id) => axios.delete(`/lessons/${id}`);
-export const searchLessons = (q, tag) => axios.get(`/search?q=${q}${tag ? `&tag=${tag}` : ""}`);
+    res.json({
+      success: true,
+      data: {
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+        },
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+/controllers/commentController.js
+import commentService from '../services/commentService.js';
 
-/assets(empty)
-/components/lessonBlock.jsx
-export default function LessonBlock({ block, index, updateBlock, removeBlock }) {
-  const handleChange = (e) => {
-    updateBlock(index, { ...block, content: e.target.value });
-  };
+exports.addComment = async (req, res, next) => {
+  try {
+    const { lessonId } = req.params;
+    const { comment } = req.body;
+    const userId = req.user.id;
 
-  if (block.type === "text") {
-    return (
-      <div style={{ marginBottom: "10px" }}>
-        <textarea
-          value={block.content}
-          onChange={handleChange}
-          placeholder="Text block"
-          style={{ width: "100%", minHeight: "60px" }}
-        />
-        <button onClick={() => removeBlock(index)}>Delete</button>
-      </div>
+    const saved = await commentService.addComment(lessonId, userId, comment);
+
+    res.json({ success: true, data: saved });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getComments = async (req, res, next) => {
+  try {
+    const comments = await commentService.getComments(req.params.lessonId);
+    res.json({ success: true, data: comments });
+  } catch (err) {
+    next(err);
+  }
+};
+/controllers/lessonController.js
+import lessonService from '../services/lessonService.js';
+
+exports.createLesson = async (req, res, next) => {
+  try {
+    const lesson = await lessonService.createLesson(req.user.id, req.body);
+    res.json({ success: true, data: lesson });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getLesson = async (req, res, next) => {
+  try {
+    const lesson = await lessonService.getLesson(req.params.lessonId);
+    if (!lesson)
+      return res.status(404).json({ success: false, error: "Lesson not found" });
+
+    res.json({ success: true, data: lesson });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.updateLesson = async (req, res, next) => {
+  try {
+    const lesson = await lessonService.updateLesson(
+      req.user.id,
+      req.params.lessonId,
+      req.body
     );
-  }
-
-  if (block.type === "code") {
-    return (
-      <div style={{ marginBottom: "10px" }}>
-        <textarea
-          value={block.content}
-          onChange={handleChange}
-          placeholder="Code block"
-          style={{ width: "100%", minHeight: "100px", fontFamily: "monospace" }}
-        />
-        <button onClick={() => removeBlock(index)}>Delete</button>
-      </div>
-    );
-  }
-
-  if (block.type === "image") {
-    return (
-      <div style={{ marginBottom: "10px" }}>
-        <input
-          type="text"
-          value={block.content}
-          onChange={handleChange}
-          placeholder="Image URL"
-        />
-        {block.content && <img src={block.content} alt="" style={{ maxWidth: "100%" }} />}
-        <button onClick={() => removeBlock(index)}>Delete</button>
-      </div>
-    );
-  }
-
-  return null;
-}
-/components/lessonBlockRenderer.jsx
-// src/components/LessonBlockRenderer.jsx
-import React from "react";
-
-const LessonBlockRenderer = ({ block }) => {
-  switch (block.type) {
-    case "text":
-      return <p style={{ marginBottom: "1em" }}>{block.content}</p>;
-
-    case "code":
-      return (
-        <pre
-          style={{
-            backgroundColor: "#f5f5f5",
-            padding: "1em",
-            borderRadius: "5px",
-            overflowX: "auto",
-          }}
-        >
-          <code>{block.content}</code>
-        </pre>
-      );
-
-    case "image":
-      return (
-        <img
-          src={block.content}
-          alt={block.alt || "Lesson image"}
-          style={{ maxWidth: "100%", marginBottom: "1em" }}
-        />
-      );
-
-    default:
-      return null;
+    res.json({ success: true, data: lesson });
+  } catch (err) {
+    next(err);
   }
 };
 
-export default LessonBlockRenderer;
-/components/lessonEditor.jsx
-import { useState } from "react";
-import LessonBlock from "./LessonBlock";
-
-export default function LessonEditor({ content, setContent }) {
-  const addBlock = (type) => {
-    setContent({ blocks: [...content.blocks, { type, content: "" }] });
-  };
-
-  const updateBlock = (index, updatedBlock) => {
-    const newBlocks = [...content.blocks];
-    newBlocks[index] = updatedBlock;
-    setContent({ blocks: newBlocks });
-  };
-
-  const removeBlock = (index) => {
-    const newBlocks = [...content.blocks];
-    newBlocks.splice(index, 1);
-    setContent({ blocks: newBlocks });
-  };
-
-  return (
-    <div>
-      <div style={{ marginBottom: "10px" }}>
-        <button onClick={() => addBlock("text")}>Add Text</button>
-        <button onClick={() => addBlock("code")}>Add Code</button>
-        <button onClick={() => addBlock("image")}>Add Image</button>
-      </div>
-
-      {content.blocks.map((block, index) => (
-        <LessonBlock
-          key={index}
-          block={block}
-          index={index}
-          updateBlock={updateBlock}
-          removeBlock={removeBlock}
-        />
-      ))}
-    </div>
-  );
-}
-/components/taginput.jsx
-import { useState } from "react";
-
-export default function TagInput({ tags, setTags }) {
-  const [input, setInput] = useState("");
-
-  const addTag = () => {
-    const trimmed = input.trim();
-    if (trimmed && !tags.includes(trimmed)) {
-      setTags([...tags, trimmed]);
-    }
-    setInput("");
-  };
-
-  const removeTag = (tagToRemove) => {
-    setTags(tags.filter((t) => t !== tagToRemove));
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      addTag();
-    }
-  };
-
-  return (
-    <div>
-      <div style={{ display: "flex", gap: "5px", flexWrap: "wrap" }}>
-        {tags.map((tag) => (
-          <span
-            key={tag}
-            style={{ background: "#eee", padding: "2px 6px", borderRadius: "4px", cursor: "pointer" }}
-            onClick={() => removeTag(tag)}
-          >
-            {tag} ×
-          </span>
-        ))}
-      </div>
-      <input
-        type="text"
-        placeholder="Add tag and press Enter"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-      />
-      <button onClick={addTag}>Add</button>
-    </div>
-  );
-}
-/context(empty)
-/pages/index.jsx
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import axios from "axios";
-
-const Index = () => {
-  const [lessons, setLessons] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Fetch latest lessons
-    const fetchLessons = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/lessons"); // you may create a GET /lessons endpoint
-        setLessons(res.data.lessons || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchLessons();
-  }, []);
-
-  return (
-    <div className="container">
-      <header className="hero">
-        <h1>Welcome to CodeVersus</h1>
-        <p>Learn, create, and share coding lessons effortlessly.</p>
-        <div className="cta-buttons">
-          <Link to="/create" className="btn btn-primary">Create Lesson</Link>
-          <Link to="/lessons" className="btn btn-secondary">Browse Lessons</Link>
-        </div>
-      </header>
-
-      <main>
-        <h2>Latest Lessons</h2>
-        {loading ? (
-          <p>Loading lessons...</p>
-        ) : (
-          <div className="lesson-grid">
-            {lessons.length === 0 ? (
-              <p>No lessons available yet.</p>
-            ) : (
-              lessons.map(lesson => (
-                <div key={lesson.id} className="lesson-card">
-                  <h3>{lesson.title}</h3>
-                  <p>{lesson.description}</p>
-                  <div className="tags">
-                    {lesson.tags.map(tag => (
-                      <span key={tag} className="tag">{tag}</span>
-                    ))}
-                  </div>
-                  <Link to={`/lesson/${lesson.id}`} className="btn btn-sm btn-primary">
-                    View Lesson
-                  </Link>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-      </main>
-    </div>
-  );
+exports.deleteLesson = async (req, res, next) => {
+  try {
+    await lessonService.deleteLesson(req.user.id, req.params.lessonId);
+    res.json({ success: true, data: "Lesson deleted" });
+  } catch (err) {
+    next(err);
+  }
 };
-
-export default Index;
-/pages/lessonCreate.jsx
-import { useState } from "react";
-import { createLesson } from "../api/lessons";
-import TagInput from "../components/tagInput";
-import { useNavigate } from "react-router-dom";
-
-export default function LessonCreate() {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [tags, setTags] = useState([]);
-  const [status, setStatus] = useState("draft");
-  const [content, setContent] = useState({ blocks: [] });
-  const navigate = useNavigate();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await createLesson({ title, description, tags, status, content });
-      if (res.data.success) {
-        navigate(`/lessons/${res.data.lesson.id}`);
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Failed to create lesson");
-    }
-  };
-
-  return (
-    <div>
-      <h2>Create Lesson</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Title:</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} required />
-        </div>
-
-        <div>
-          <label>Description:</label>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} required />
-        </div>
-
-        <div>
-          <label>Tags:</label>
-          <TagInput tags={tags} setTags={setTags} />
-        </div>
-
-        <div>
-          <label>Status:</label>
-          <select value={status} onChange={(e) => setStatus(e.target.value)}>
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-          </select>
-        </div>
-
-        <div>
-          <label>Content:</label>
-          <LessonEditor content={content} setContent={setContent} />
-        </div>
-
-
-        <button type="submit">Create Lesson</button>
-      </form>
-    </div>
-  );
-}
-/pages/lessonView.jsx
-// src/pages/LessonView.jsx
-import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { getLesson } from "../api/lessons";
-import LessonBlockRenderer from "../components/lessonBlockRenderer";
-
-const LessonView = () => {
-  const { id } = useParams();
-  const [lesson, setLesson] = useState(null);
-
-  useEffect(() => {
-    const fetchLesson = async () => {
-      try {
-        const res = await getLesson(id);
-        setLesson(res.data.lesson);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchLesson();
-  }, [id]);
-
-  if (!lesson) return <p>Loading lesson...</p>;
-
-  return (
-    <div style={{ maxWidth: "800px", margin: "0 auto", padding: "2em" }}>
-      <h1>{lesson.title}</h1>
-      <p>{lesson.description}</p>
-      <div style={{ marginBottom: "1em" }}>
-        {lesson.tags?.map((tag) => (
-          <span
-            key={tag}
-            style={{
-              display: "inline-block",
-              backgroundColor: "#eee",
-              padding: "0.2em 0.5em",
-              marginRight: "0.5em",
-              borderRadius: "3px",
-              fontSize: "0.9em",
-            }}
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
-      {lesson.content?.blocks?.map((block, index) => (
-        <LessonBlockRenderer key={index} block={block} />
-      ))}
-    </div>
-  );
-};
-
-export default LessonView;
-/pages/login.jsx
-// src/pages/Login.jsx
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { loginUser } from "../api/auth";
-
-const Login = () => {
-  const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    if (!form.email || !form.password) {
-      setError("Both email and password are required.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const res = await loginUser(form);
-      localStorage.setItem("token", res.data.token);
-      navigate("/"); // Redirect to home or dashboard
-    } catch (err) {
-      setError(err.response?.data?.error || "Login failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div style={{ maxWidth: "400px", margin: "2em auto", padding: "2em", border: "1px solid #ccc", borderRadius: "5px" }}>
-      <h2>Login</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          style={{ width: "100%", marginBottom: "1em", padding: "0.5em" }}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          style={{ width: "100%", marginBottom: "1em", padding: "0.5em" }}
-        />
-        <button type="submit" disabled={loading} style={{ width: "100%", padding: "0.5em" }}>
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form>
-    </div>
-  );
-};
-
-export default Login;
-/pages/register.jsx
-// src/pages/Register.jsx
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { registerUser } from "../api/auth";
-
-const Register = () => {
-  const navigate = useNavigate();
-  const [form, setForm] = useState({ username: "", email: "", password: "" });
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    if (!form.username || !form.email || !form.password) {
-      setError("All fields are required.");
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const res = await registerUser(form);
-      localStorage.setItem("token", res.data.token);
-      navigate("/"); // Redirect to home or dashboard
-    } catch (err) {
-      setError(err.response?.data?.error || "Registration failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div style={{ maxWidth: "400px", margin: "2em auto", padding: "2em", border: "1px solid #ccc", borderRadius: "5px" }}>
-      <h2>Register</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={form.username}
-          onChange={handleChange}
-          style={{ width: "100%", marginBottom: "1em", padding: "0.5em" }}
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          style={{ width: "100%", marginBottom: "1em", padding: "0.5em" }}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          style={{ width: "100%", marginBottom: "1em", padding: "0.5em" }}
-        />
-        <button type="submit" disabled={loading} style={{ width: "100%", padding: "0.5em" }}>
-          {loading ? "Registering..." : "Register"}
-        </button>
-      </form>
-    </div>
-  );
-};
-
-export default Register;
-/styles(empty)
-/app.jsx
-// src/App.jsx
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LessonView from "./pages/lessonView";
-import LessonCreate from "./pages/lessonCreate";
-import Login from "./pages/login";
-import Register from "./pages/register";
-
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<LessonCreate />} /> {/* or a home page */}
-        <Route path="/lessons/:id" element={<LessonView />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-      </Routes>
-    </Router>
-  );
-}
-
-export default App;
-/main.jsx
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.jsx'
-
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+/controllers/ratingController.js
+/controllers/searchController.js
+/db
+/models(empty)
+/middlewares
+/routes
+/services
+/utils
+/validation
+index.js

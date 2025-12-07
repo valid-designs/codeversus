@@ -1,11 +1,12 @@
-import express from 'express.js';
-const router = express.Router({ mergeParams: true });
-import ctrl from '../controllers/ratingController.js';
-import auth from '../middlewares/authMiddleware.js';
-import validate from '../middlewares/validate.js';
-const { ratingSchema } = require("../validation/schemas");
+import express from "express";
+import { rateLesson, getRatings } from "../controllers/ratingController.js";
+import auth from "../middlewares/authMiddleware.js";
+import validate from "../middlewares/validate.js";
+import { ratingSchema } from "../validation/schemas.js";
 
-router.post("/", auth, validate(ratingSchema), ctrl.rateLesson);
-router.get("/", ctrl.getRatings);
+const router = express.Router({ mergeParams: true });
+
+router.post("/", auth, validate(ratingSchema), rateLesson);
+router.get("/", getRatings);
 
 export default router;

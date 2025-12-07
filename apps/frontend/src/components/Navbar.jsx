@@ -1,35 +1,35 @@
-import { Link } from "react-router-dom";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Navbar() {
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
-  const logout = () => {
+  const handleLogout = () => {
     localStorage.removeItem("token");
-    window.location.href = "/";
+    navigate("/login");
   };
 
   return (
-    <nav style={{ padding: "1em", borderBottom: "1px solid #ddd" }}>
-      <Link to="/" style={{ marginRight: "1em" }}>
-        Home
-      </Link>
-      <Link to="/lessons" style={{ marginRight: "1em" }}>
-        Lessons
-      </Link>
-      <Link to="/create" style={{ marginRight: "1em" }}>
-        Create Lesson
-      </Link>
-
-      {token ? (
-        <button onClick={logout}>Logout</button>
-      ) : (
-        <>
-          <Link to="/login" style={{ marginRight: "1em" }}>
-            Login
-          </Link>
-          <Link to="/register">Register</Link>
-        </>
-      )}
+    <nav style={{ display: "flex", justifyContent: "space-between", padding: "1em 2em", background: "#333", color: "#fff" }}>
+      <div>
+        <Link to="/" style={{ color: "#fff", textDecoration: "none", fontWeight: "bold" }}>CodeVersus</Link>
+      </div>
+      <div style={{ display: "flex", gap: "1em" }}>
+        <Link to="/" style={{ color: "#fff", textDecoration: "none" }}>Home</Link>
+        <Link to="/lessons" style={{ color: "#fff", textDecoration: "none" }}>Lessons</Link>
+        {token ? (
+          <>
+            <Link to="/create" style={{ color: "#fff", textDecoration: "none" }}>Create</Link>
+            <button onClick={handleLogout} style={{ background: "transparent", border: "none", color: "#fff", cursor: "pointer" }}>Logout</button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" style={{ color: "#fff", textDecoration: "none" }}>Login</Link>
+            <Link to="/register" style={{ color: "#fff", textDecoration: "none" }}>Register</Link>
+          </>
+        )}
+      </div>
     </nav>
   );
 }
