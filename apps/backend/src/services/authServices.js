@@ -1,5 +1,5 @@
-const pool = require("../db");
-const bcrypt = require("bcryptjs");
+import pool from '../db.js';
+import bcrypt from 'bcryptjs.js';
 
 exports.register = async (username, email, password) => {
   email = email.toLowerCase();

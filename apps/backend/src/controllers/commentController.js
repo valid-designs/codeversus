@@ -1,4 +1,4 @@
-const commentService = require("../services/commentService");
+import commentService from '../services/commentService.js';
 
 exports.addComment = async (req, res, next) => {
   try {

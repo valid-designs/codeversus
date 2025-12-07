@@ -1,4 +1,4 @@
-const pool = require("../db");
+import pool from '../db.js';
 
 exports.searchLessons = async ({ q, tag }) => {
   let query = `

@@ -1,11 +1,11 @@
-const express = require("express");
+import express from 'express.js';
 const router = express.Router({ mergeParams: true });
-const ctrl = require("../controllers/commentController");
-const auth = require("../middlewares/authMiddleware");
-const validate = require("../middlewares/validate");
+import ctrl from '../controllers/commentController.js';
+import auth from '../middlewares/authMiddleware.js';
+import validate from '../middlewares/validate.js';
 const { commentSchema } = require("../validation/schemas");
 
 router.post("/", auth, validate(commentSchema), ctrl.addComment);
 router.get("/", ctrl.getComments);
 
-module.exports = router;
+export default router;

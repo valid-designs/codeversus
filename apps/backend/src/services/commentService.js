@@ -1,5 +1,5 @@
-const pool = require("../db");
-const sanitize = require("../utils/sanitize");
+import pool from '../db.js';
+import sanitize from '../utils/sanitize.js';
 
 exports.addComment = async (lessonId, userId, commentText) => {
   const safeComment = sanitize(commentText);

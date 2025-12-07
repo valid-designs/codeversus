@@ -1,4 +1,4 @@
-const pool = require("../db");
+import pool from '../db.js';
 
 exports.createLesson = async (userId, { title, description, content, status, tags }) => {
   const result = await pool.query(

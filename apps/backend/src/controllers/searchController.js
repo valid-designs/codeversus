@@ -1,4 +1,4 @@
-const searchService = require("../services/searchService");
+import searchService from '../services/searchService.js';
 
 exports.searchLessons = async (req, res, next) => {
   try {

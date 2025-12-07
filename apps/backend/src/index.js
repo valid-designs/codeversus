@@ -1,12 +1,15 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import authRoutes from "./routes/auth.js";
-import lessonsRoutes from "./routes/lessons.js";
+// src/index.js
+import express from 'express.js';
+import cors from 'cors.js';
+import dotenv from 'dotenv.js';
+import authRoutes from './routes/auth.js';
+import lessonsRoutes from './routes/lessons.js';
+import errorHandler from './middlewares/errorHandler.js'; // adjust path if needed
 
 dotenv.config();
 
 const app = express();
+
 const allowedOrigins = [
   "http://localhost:5173",
   process.env.FRONTEND_URL // <-- Set this in Render environment variables
@@ -27,7 +30,6 @@ app.use("/lessons", lessonsRoutes);
 app.get("/", (req, res) => res.send("Backend is live"));
 
 // Global error handler
-const errorHandler = require("./src/middlewares/errorHandler");
 app.use(errorHandler);
 
 // Port

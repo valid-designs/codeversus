@@ -1,4 +1,4 @@
-const ratingService = require("../services/ratingService");
+import ratingService from '../services/ratingService.js';
 
 exports.rateLesson = async (req, res, next) => {
   try {

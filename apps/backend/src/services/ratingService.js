@@ -1,4 +1,4 @@
-const pool = require("../db");
+import pool from '../db.js';
 
 exports.rateLesson = async (lessonId, userId, rating) => {
   const existing = await pool.query(

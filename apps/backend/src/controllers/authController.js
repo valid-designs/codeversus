@@ -1,5 +1,5 @@
-const authService = require("../services/authService");
-const generateToken = require("../utils/generateToken");
+import authService from '../services/authService.js';
+import generateToken from '../utils/generateToken.js';
 
 exports.register = async (req, res, next) => {
   try {

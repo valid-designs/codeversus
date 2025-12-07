@@ -1,4 +1,4 @@
-const lessonService = require("../services/lessonService");
+import lessonService from '../services/lessonService.js';
 
 exports.createLesson = async (req, res, next) => {
   try {
