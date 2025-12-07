@@ -4,11 +4,11 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 
 import Index from "./pages/index";
-import LessonsList from "./pages/LessonsList";
-import LessonView from "./pages/LessonView";
-import LessonCreate from "./pages/LessonCreate";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import LessonsList from "./pages/lessonsList";
+import LessonView from "./pages/lessonView";
+import LessonCreate from "./pages/lessonCreate";
+import Login from "./pages/login";
+import Register from "./pages/register";
 
 export default function App() {
   return (
