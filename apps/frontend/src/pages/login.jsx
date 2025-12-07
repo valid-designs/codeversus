@@ -37,7 +37,6 @@ const Login = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <img src="/logo.png" alt="Logo" className="auth-logo" />
         <h2>Login</h2>
         {error && <p className="error">{error}</p>}
 
@@ -68,10 +67,10 @@ const Login = () => {
         </div>
 
         <button className="social-button">
-          <img src="/google-icon.svg" alt="Google" /> Login with Google
+          <img src="/google-icon.svg"/> Login with Google
         </button>
         <button className="social-button">
-          <img src="/facebook-icon.svg" alt="Facebook" /> Login with Facebook
+          <img src="/facebook-icon.svg"/> Login with Facebook
         </button>
 
         <p>

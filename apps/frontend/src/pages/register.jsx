@@ -37,7 +37,6 @@ const Register = () => {
   return (
     <div className="auth-container">
       <div className="auth-card">
-        <img src="/logo.png" alt="Logo" className="auth-logo" />
         <h2>Register</h2>
         {error && <p className="error">{error}</p>}
 
@@ -75,10 +74,10 @@ const Register = () => {
         </div>
 
         <button className="social-button">
-          <img src="/google-icon.svg" alt="Google" /> Sign up with Google
+          <img src="/google-icon.svg"/> Sign up with Google
         </button>
         <button className="social-button">
-          <img src="/facebook-icon.svg" alt="Facebook" /> Sign up with Facebook
+          <img src="/facebook-icon.svg"/> Sign up with Facebook
         </button>
 
         <p>
