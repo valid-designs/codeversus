@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createLesson } from "../api/lessons";
-import TagInput from "../components/TagInput";
+import TagInput from "../components/tagInput";
 import { useNavigate } from "react-router-dom";
 
 export default function LessonCreate() {

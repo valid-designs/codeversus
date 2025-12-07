@@ -1,10 +1,10 @@
 // src/App.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LessonView from "./pages/LessonView";
-import LessonCreate from "./pages/LessonCreate";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import LessonView from "./pages/lessonView";
+import LessonCreate from "./pages/lessonCreate";
+import Login from "./pages/login";
+import Register from "./pages/register";
 
 function App() {
   return (

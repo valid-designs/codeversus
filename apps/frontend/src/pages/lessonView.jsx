@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getLesson } from "../api/lessons";
-import LessonBlockRenderer from "../components/LessonBlockRenderer";
+import LessonBlockRenderer from "../components/lessonBlockRenderer";
 
 const LessonView = () => {
   const { id } = useParams();
