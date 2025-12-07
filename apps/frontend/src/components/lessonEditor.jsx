@@ -1,5 +1,5 @@
 import { useState } from "react";
-import LessonBlock from "./LessonBlock";
+import LessonBlock from "./lessonBlock";
 
 export default function LessonEditor({ content, setContent }) {
   const addBlock = (type) => {

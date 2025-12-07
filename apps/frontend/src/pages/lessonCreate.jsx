@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createLesson } from "../api/lessons";
 import TagInput from "../components/tagInput";
 import { useNavigate } from "react-router-dom";
-import LessonEditor from "../components/LessonEditor";
+import LessonEditor from "../components/lessonEditor";
 
 export default function LessonCreate() {
   const [title, setTitle] = useState("");

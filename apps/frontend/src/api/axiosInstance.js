@@ -1,10 +1,10 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "https://codeversus-backend.onrender.com",
+  baseURL: import.meta.env.VITE_API_URL
 });
 
-// attach JWT automatically
+// Attach JWT automatically
 instance.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -13,4 +13,4 @@ instance.interceptors.request.use((config) => {
   return config;
 });
 
-export default axiosinstance;
+export default instance;
