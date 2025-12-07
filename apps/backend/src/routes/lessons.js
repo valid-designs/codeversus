@@ -1,14 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const lessonController = require("../controllers/lessonController");
-const authMiddleware = require("../middlewares/authMiddleware");
+const ctrl = require("../controllers/lessonController");
+const auth = require("../middlewares/authMiddleware");
+const validate = require("../middlewares/validate");
+const { lessonCreateSchema, lessonUpdateSchema } = require("../validation/schemas");
 
-// Protected routes (only logged-in users can create/update/delete)
-router.post("/", authMiddleware, lessonController.createLesson);
-router.put("/:id", authMiddleware, lessonController.updateLesson);
-router.delete("/:id", authMiddleware, lessonController.deleteLesson);
-
-// Public routes
-router.get("/:id", lessonController.getLesson);
+router.post("/", auth, validate(lessonCreateSchema), ctrl.createLesson);
+router.put("/:lessonId", auth, validate(lessonUpdateSchema), ctrl.updateLesson);
+router.delete("/:lessonId", auth, ctrl.deleteLesson);
+router.get("/:lessonId", ctrl.getLesson);
 
 module.exports = router;

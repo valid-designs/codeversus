@@ -1,6 +1,10 @@
 const { Pool } = require("pg");
 require("dotenv").config();
 
+if (!process.env.JWT_SECRET) {
+  throw new Error("FATAL: Missing JWT_SECRET in environment");
+}
+
 const pool = new Pool({
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
@@ -8,9 +12,5 @@ const pool = new Pool({
   port: process.env.DB_PORT,
   database: process.env.DB_NAME,
 });
-
-pool.connect()
-  .then(() => console.log("PostgreSQL connected"))
-  .catch(err => console.error("DB connection error:", err));
 
 module.exports = pool;

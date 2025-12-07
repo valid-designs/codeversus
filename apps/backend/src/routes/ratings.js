@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router({ mergeParams: true });
-const ratingController = require("../controllers/ratingController");
-const authMiddleware = require("../middlewares/authMiddleware");
+const ctrl = require("../controllers/ratingController");
+const auth = require("../middlewares/authMiddleware");
+const validate = require("../middlewares/validate");
+const { ratingSchema } = require("../validation/schemas");
 
-// Protected: add or update rating
-router.post("/", authMiddleware, ratingController.rateLesson);
-
-// Public: get all ratings and average
-router.get("/", ratingController.getRatings);
+router.post("/", auth, validate(ratingSchema), ctrl.rateLesson);
+router.get("/", ctrl.getRatings);
 
 module.exports = router;

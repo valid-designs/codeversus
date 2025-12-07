@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "http://localhost:5000", // your backend URL
+  baseURL: "https://codeversus-backend.onrender.com",
 });
 
 // attach JWT automatically
@@ -13,4 +13,4 @@ instance.interceptors.request.use((config) => {
   return config;
 });
 
-export default instance;
+export default axiosinstance;

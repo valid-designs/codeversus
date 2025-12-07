@@ -1,67 +1,36 @@
-const pool = require("../db");
-const bcrypt = require("bcryptjs");
+const authService = require("../services/authService");
 const generateToken = require("../utils/generateToken");
 
-exports.register = async (req, res) => {
-  const { username, email, password } = req.body;
-
+exports.register = async (req, res, next) => {
   try {
-    const exists = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    const { username, email, password } = req.body;
+    const user = await authService.register(username, email, password);
 
-    if (exists.rows.length > 0) {
-      return res.status(400).json({ success: false, error: "Email already exists" });
-    }
-
-    const hashed = await bcrypt.hash(password, 10);
-
-    const insertQuery = `
-      INSERT INTO users (username, email, password)
-      VALUES ($1, $2, $3)
-      RETURNING id, username, email, created_at
-    `;
-
-    const result = await pool.query(insertQuery, [username, email, hashed]);
-
-    res.json({ success: true, user: result.rows[0] });
-
+    res.json({ success: true, data: user });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: "Registration failed" });
+    next(err);
   }
 };
 
-exports.login = async (req, res) => {
-  const { email, password } = req.body;
-
+exports.login = async (req, res, next) => {
   try {
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    const { email, password } = req.body;
+    const user = await authService.login(email, password);
 
-    if (result.rows.length === 0) {
-      return res.status(400).json({ success: false, error: "User does not exist" });
-    }
-
-    const user = result.rows[0];
-
-    const match = await bcrypt.compare(password, user.password);
-
-    if (!match) {
-      return res.status(400).json({ success: false, error: "Invalid password" });
-    }
-
-    const token = generateToken(user.id);
+    const token = generateToken(user);
 
     res.json({
       success: true,
-      token,
-      user: {
-        id: user.id,
-        username: user.username,
-        email: user.email
-      }
+      data: {
+        token,
+        user: {
+          id: user.id,
+          username: user.username,
+          email: user.email,
+        },
+      },
     });
-
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: "Login failed" });
+    next(err);
   }
 };

@@ -1,91 +1,44 @@
-const pool = require("../db");
+const lessonService = require("../services/lessonService");
 
-
-// CREATE LESSON
-exports.createLesson = async (req, res) => {
-  const { title, description, content, status, tags } = req.body;
-  const userId = req.user.id;
-
+exports.createLesson = async (req, res, next) => {
   try {
-    const result = await pool.query(
-      `INSERT INTO lessons (title, description, content, status, user_id, tags)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, title, description, status, tags, created_at`,
-      [title, description, content, status, userId, tags || []] // default to empty array
-    );
-
-    res.json({ success: true, lesson: result.rows[0] });
+    const lesson = await lessonService.createLesson(req.user.id, req.body);
+    res.json({ success: true, data: lesson });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to create lesson" });
+    next(err);
   }
 };
 
-
-
-// GET LESSON BY ID
-exports.getLesson = async (req, res) => {
-  const { id } = req.params;
-
+exports.getLesson = async (req, res, next) => {
   try {
-    const query = "SELECT * FROM lessons WHERE id=$1";
-    const result = await pool.query(query, [id]);
-    if (result.rows.length === 0) return res.status(404).json({ error: "Lesson not found" });
+    const lesson = await lessonService.getLesson(req.params.lessonId);
+    if (!lesson)
+      return res.status(404).json({ success: false, error: "Lesson not found" });
 
-    res.json({ success: true, lesson: result.rows[0] });
+    res.json({ success: true, data: lesson });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: "Failed to get lesson" });
+    next(err);
   }
 };
 
-// UPDATE LESSON (only creator)
-exports.updateLesson = async (req, res) => {
-  const { lessonId } = req.params;
-  const { title, description, content, status, tags } = req.body;
-  const userId = req.user.id;
-
+exports.updateLesson = async (req, res, next) => {
   try {
-    // Ensure user owns the lesson
-    const check = await pool.query(
-      "SELECT * FROM lessons WHERE id=$1 AND user_id=$2",
-      [lessonId, userId]
+    const lesson = await lessonService.updateLesson(
+      req.user.id,
+      req.params.lessonId,
+      req.body
     );
-
-    if (check.rows.length === 0) {
-      return res.status(403).json({ error: "Not authorized to update this lesson" });
-    }
-
-    const result = await pool.query(
-      `UPDATE lessons
-       SET title=$1, description=$2, content=$3, status=$4, tags=$5
-       WHERE id=$6
-       RETURNING id, title, description, status, tags, created_at`,
-      [title, description, content, status, tags || [], lessonId]
-    );
-
-    res.json({ success: true, lesson: result.rows[0] });
+    res.json({ success: true, data: lesson });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Failed to update lesson" });
+    next(err);
   }
 };
 
-
-// DELETE LESSON (only creator)
-exports.deleteLesson = async (req, res) => {
-  const { id } = req.params;
-  const userId = req.user.id;
-
+exports.deleteLesson = async (req, res, next) => {
   try {
-    const check = await pool.query("SELECT * FROM lessons WHERE id=$1", [id]);
-    if (check.rows.length === 0) return res.status(404).json({ error: "Lesson not found" });
-    if (check.rows[0].creator_id !== userId) return res.status(403).json({ error: "Not authorized" });
-
-    await pool.query("DELETE FROM lessons WHERE id=$1", [id]);
-    res.json({ success: true, message: "Lesson deleted" });
+    await lessonService.deleteLesson(req.user.id, req.params.lessonId);
+    res.json({ success: true, data: "Lesson deleted" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, error: "Failed to delete lesson" });
+    next(err);
   }
 };
