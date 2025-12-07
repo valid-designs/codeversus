@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 
 import Index from "./pages/index";
-import LessonsList from "./pages/lessonsList";
+import LessonsList from "./pages/lessonList";
 import LessonView from "./pages/lessonView";
 import LessonCreate from "./pages/lessonCreate";
 import Login from "./pages/login";

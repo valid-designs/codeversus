@@ -1,6 +1,6 @@
 import pool from "../db/index.js";
 
-export const createLesson = async (userId, { title, description, content, status, tags }) => {
+const createLesson = async (userId, { title, description, content, status, tags }) => {
   const result = await pool.query(
     "INSERT INTO lessons (title, description, content, status, user_id, tags) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id, title, description, content, status, tags, created_at",
     [title, description, content, status, userId, tags || []]
@@ -8,7 +8,7 @@ export const createLesson = async (userId, { title, description, content, status
   return result.rows[0];
 };
 
-export const getLesson = async (lessonId) => {
+const getLesson = async (lessonId) => {
   const result = await pool.query(
     "SELECT id, title, description, content, status, user_id, tags, created_at FROM lessons WHERE id=$1",
     [lessonId]
@@ -16,7 +16,7 @@ export const getLesson = async (lessonId) => {
   return result.rows[0];
 };
 
-export const updateLesson = async (userId, lessonId, payload) => {
+const updateLesson = async (userId, lessonId, payload) => {
   const check = await pool.query("SELECT user_id FROM lessons WHERE id=$1", [lessonId]);
   if (!check.rows.length) throw new Error("Lesson not found");
   if (check.rows[0].user_id !== userId) throw new Error("Not authorized");
@@ -29,7 +29,7 @@ export const updateLesson = async (userId, lessonId, payload) => {
   return result.rows[0];
 };
 
-export const deleteLesson = async (userId, lessonId) => {
+const deleteLesson = async (userId, lessonId) => {
   const check = await pool.query("SELECT user_id FROM lessons WHERE id=$1", [lessonId]);
   if (!check.rows.length) throw new Error("Lesson not found");
   if (check.rows[0].user_id !== userId) throw new Error("Not authorized");
@@ -37,3 +37,5 @@ export const deleteLesson = async (userId, lessonId) => {
   await pool.query("DELETE FROM lessons WHERE id=$1", [lessonId]);
   return true;
 };
+
+export default { createLesson, getLesson, updateLesson, deleteLesson };

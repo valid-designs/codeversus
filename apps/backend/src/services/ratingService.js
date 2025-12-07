@@ -1,6 +1,6 @@
 import pool from "../db/index.js";
 
-export const rateLesson = async (lessonId, userId, rating) => {
+const rateLesson = async (lessonId, userId, rating) => {
   const existing = await pool.query("SELECT id FROM lesson_ratings WHERE lesson_id=$1 AND user_id=$2", [lessonId, userId]);
   if (existing.rows.length > 0) {
     const update = await pool.query(
@@ -17,7 +17,7 @@ export const rateLesson = async (lessonId, userId, rating) => {
   return insert.rows[0];
 };
 
-export const getRatings = async (lessonId) => {
+const getRatings = async (lessonId) => {
   const ratings = await pool.query(
     "SELECT r.id, r.rating, u.username FROM lesson_ratings r JOIN users u ON r.user_id = u.id WHERE r.lesson_id=$1",
     [lessonId]
@@ -30,3 +30,5 @@ export const getRatings = async (lessonId) => {
 
   return { ratings: ratings.rows, average: parseFloat(average.rows[0].avg) };
 };
+
+export default { rateLesson, getRatings };
